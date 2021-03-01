@@ -1,18 +1,79 @@
-# Getting Started with Create React App
+# Welcome to Computer Vision World
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+### This is a web application (Image Classification, Object Detection, Instant Segmentation)
+#### By K.W Hong and Y.W. Cho
+##### Any question and comment, email here: kh4vv@virginia.edu (K.W Hong) and choyoungwoon@gmail.com (Y. W Cho)
 
-## Available Scripts
+#### Index of Contents
 
-In the project directory, you can run:
+1. [Getting Started](#getting-Started)
 
-### `npm start`
+## Getting Started
 
-Runs the app in the development mode.\
+#### Frontend
+
+First, you need to `git clone` the project and go to the directory.
+```
+$ git clone https://github.com/kh4vv/webvision_app.git
+$ cd webvision_app
+```
+Second, in order to run this application, you need to install `node.js` and `npm`.
+Here is the instruction where and how to install those: [node.js](https://nodejs.org/en/download/)
+
+Once you have `node.js`, you will automatically get `npm` installed in your machine. 
+
+Third, you need to install `yarn` through the `npm package manager`. You can install it by writing this command:
+```
+$ npm install --global yarn
+```
+Then, you need to download the node-modules to start the application. 
+```
+$ npm install react-script
+```
+Once it is done, you can start the application:
+```
+$ yarn start
+```
+
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
 The page will reload if you make edits.\
 You will also see any lint errors in the console.
+
+#### Backend
+
+You can open the another terminal. Before you lauch the backend, you need to download\
+few libraries and [flask](https://flask.palletsprojects.com/en/1.1.x/).
+
+Let's create a virtual environment called `venv` in the project directory `webvision_app/`:\
+If you don't have the virtual environment was not created successfully, you can download by
+`apt-get install python3-venv`
+
+
+```
+$ cd api
+$ python3 -m venv venv
+$ source venv/bin/activate
+(venv) $ _
+```
+Now, let's download all neccessary libraries before starting the backend server.
+All the requriement libraries are in `requirement.txt`. 
+```
+$ pip install -r requirement.txt
+```
+
+After that, you can start it by using `yarn`:
+```
+$ yarn start-api
+```
+
+
+## Available Scripts
+.W. Cho
+In the project directory, you can run:
+
+### `npm start`
+
 
 ### `npm test`
 
