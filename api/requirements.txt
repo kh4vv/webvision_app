@@ -1,0 +1,9 @@
+pillow
+efficientnet_pytorch
+albumentations
+flask
+opencv-python
+numpy
+torch
+torchvision
+
