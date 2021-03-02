@@ -21,10 +21,11 @@ $ cd webvision_app
 **Second**, in order to run this application, you need to install `node.js` and `npm`.
 Here is the instruction where and how to install those: [node.js](https://nodejs.org/en/download/)
 
-Once you have `node.js`, you will automatically get `npm` installed in your machine. 
+Once you have `node.js`, you will automatically get `npm` installed in your machine.
 
 **Third**, you need to install `yarn` through the `npm package manager`. You can install it by writing this command:
 ```
+$ npm install -g npm 
 $ npm install --global yarn
 ```
 Then, you need to download the node-modules to start the application. 
