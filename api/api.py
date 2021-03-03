@@ -11,9 +11,13 @@ import cv2
 from io import BytesIO
 
 import torch
-from inference import mnist_evaluation, quickdraw_evaluation, landmark_evaluation, transform_landmark
-from objdec_inference import yolov3_evaluation
-from model import LeNet, ResNext101Landmark
+
+from classification.evaluation import mnist_evaluation, quickdraw_evaluation, landmark_evaluation, transform_landmark
+from classification.models.models import LeNet, ResNext101Landmark, EfficientNetLandmark
+
+# 수정필요(패키지 불러오기오류 from model import 패키지-> from eval import eval)
+# from object_det.yolov3 import evaluation
+
 
 # Initialize the useless part of the base64 encoded image.
 init_Base64 = 22
@@ -37,16 +41,15 @@ def get_current_time():
 
 @app.route('/mnist_upload', methods=['GET', 'POST'])
 def fileUpload():
-    path = '../public/img'
     mnist_f = request.files['file']
     mnist_fname = secure_filename(mnist_f.filename)
     print(mnist_fname)
 
-    mnist_f.save(os.path.join('static', mnist_fname))
+    mnist_f.save(os.path.join('outputs', mnist_fname))
     mnist_img = Image.open(mnist_f, 'r')
-    mnist_img.save(os.path.join("outputs/", mnist_fname))
+    mnist_img.save(os.path.join('outputs/', mnist_fname))
 
-    weight_path = './weights/mnist.pth'
+    weight_path = './classification/weights/mnist.pth'
     mnist_model = LeNet().to(device)
 
     mnist_img, mnist_preds = mnist_evaluation(
@@ -68,7 +71,7 @@ def mnist_predict():
         mnist_img = Image.open(BytesIO(base64.b64decode(mnist_draw)))
         mnist_img.save("test.png")
 
-        weight_path = './weights/mnist.pth'
+        weight_path = './classification/weights/mnist.pth'
         mnist_model = LeNet().to(device)
         mnist_img, mnist_pred = mnist_evaluation(
             mnist_img, weight_path, mnist_model, pad=True)
@@ -96,8 +99,8 @@ def landmark_upload_image():
         landmark_img.save(os.path.join(path, landmark_fname))
 
         num_classes = 1049
-        # weight_path = './weights/effnet_448_512_34_190000.pth'
-        weight_path = './weights/ResNext101_448_300_141_390000.pth'
+        # weight_path = './object_det/weights/effnet_448_512_34_190000.pth'
+        weight_path = './object_det/weights/ResNext101_448_300_141_390000.pth'
 
         # model = EfficientNetLandmark(1, num_classes)
         model = ResNext101Landmark(num_classes).to(device)
@@ -121,11 +124,6 @@ def quickdraw_predict():
         quick_draw = request.form['url']
         quick_draw = quick_draw[init_Base64:]
         quick_draw_decoded = base64.b64decode(quick_draw)
-
-        # Fix later(to PIL version)
-        # Conver bytes array to PIL Image
-        # imageStream = io.BytesIO(draw_decoded)
-        # img = Image.open(imageStream)
 
         quick_img = np.asarray(bytearray(quick_draw_decoded), dtype="uint8")
         quick_img = cv2.imdecode(quick_img, cv2.IMREAD_GRAYSCALE)
