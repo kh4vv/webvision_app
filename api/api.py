@@ -1,6 +1,6 @@
 import time
 import os
-from flask import Flask, flash, request, redirect, url_for, session
+from flask import Flask, flash, request, redirect, url_for, session, jsonify
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from PIL import Image
@@ -8,7 +8,7 @@ import numpy as np
 import json
 import base64
 import cv2
-import io
+from io import BytesIO
 
 import torch
 from inference import mnist_evaluation, quickdraw_evaluation, landmark_evaluation, transform_landmark
@@ -18,7 +18,7 @@ from model import LeNet, ResNext101Landmark
 # Initialize the useless part of the base64 encoded image.
 init_Base64 = 22
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='outputs')
 CORS(app)
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -37,26 +37,24 @@ def get_current_time():
 
 @app.route('/mnist_upload', methods=['GET', 'POST'])
 def fileUpload():
-    if request.method == 'POST':
-        path = '../public/img'
-        mnist_f = request.files['file']
-        mnist_fname = secure_filename(mnist_f.filename)
-        print(mnist_fname)
+    path = '../public/img'
+    mnist_f = request.files['file']
+    mnist_fname = secure_filename(mnist_f.filename)
+    print(mnist_fname)
 
-        mnist_f.save(os.path.join('static', mnist_fname))
-        mnist_img = Image.open(mnist_f, 'r')
-        mnist_img.save(os.path.join(path, mnist_fname))
+    mnist_f.save(os.path.join('static', mnist_fname))
+    mnist_img = Image.open(mnist_f, 'r')
+    mnist_img.save(os.path.join("outputs/", mnist_fname))
 
-        weight_path = './weights/mnist.pth'
-        mnist_model = LeNet().to(device)
+    weight_path = './weights/mnist.pth'
+    mnist_model = LeNet().to(device)
 
-        mnist_img, mnist_preds = mnist_evaluation(
-            mnist_img, weight_path, mnist_model)
-        mnist_preds = int(mnist_preds)
-        print(mnist_preds)
-        return {'filename': mnist_fname, 'pred': mnist_preds}
-    else:
-        return {}
+    mnist_img, mnist_preds = mnist_evaluation(
+        mnist_img, weight_path, mnist_model)
+    mnist_preds = int(mnist_preds)
+    print(mnist_preds)
+    result = {'filename': mnist_fname, 'pred': mnist_preds}
+    return jsonify(result)
 
 
 @app.route('/mnist_pad', methods=['GET', 'POST'])
@@ -65,34 +63,20 @@ def mnist_predict():
     if request.method == 'POST':
 
         mnist_draw = request.form['url']
-        print(mnist_draw)
         mnist_draw = mnist_draw[init_Base64:]
-        print(mnist_draw)
-        mnist_draw_decoded = base64.b64decode(mnist_draw)
-        # Fix later(to PIL version)
-        # Conver bytes array to PIL Image
-        imageStream = io.BytesIO(base64.b64decode(mnist_draw))
-        img = Image.open(imageStream)
-        I = np.asarray(img)
-        print(I)
 
-        mnist_img = np.asarray(bytearray(mnist_draw_decoded), dtype="uint8")
-        mnist_img = cv2.imdecode(mnist_img, cv2.IMREAD_GRAYSCALE)
-        mnist_img = cv2.resize(mnist_img, (28, 28),
-                               interpolation=cv2.INTER_AREA)
-        print(mnist_img)
-        mnist_img = Image.fromarray(mnist_img)
-        print(mnist_img)
+        mnist_img = Image.open(BytesIO(base64.b64decode(mnist_draw)))
+        mnist_img.save("test.png")
 
         weight_path = './weights/mnist.pth'
         mnist_model = LeNet().to(device)
         mnist_img, mnist_pred = mnist_evaluation(
-            mnist_img, weight_path, mnist_model)
+            mnist_img, weight_path, mnist_model, pad=True)
 
         mnist_pred = int(mnist_pred)
         print(mnist_pred)
 
-        return mnist_draw_decoded
+        return {}
 
     return result
 
@@ -157,6 +141,12 @@ def quickdraw_predict():
         quick_pred = int(quick_pred)
         quick_label = quickdraw_animal_map[quick_pred]
     return render_template('draw_quickdraw.html')
+
+
+@app.route('/outputs', methods=['GET', 'POST'])
+def output():
+    filename_id = request.args.get('filename')
+    return app.send_static_file(filename_id+'.png')
 
 
 if __name__ == '__main__':

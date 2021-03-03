@@ -14,7 +14,7 @@ class Pad extends Component {
 
   fileUploadHandler = () => {
     this.setState({
-      value: this.sigPad.getTrimmedCanvas()
+      value: this.sigPad.getCanvas()
         .toDataURL('image/png')
     })
     console.log(this.state.value);
@@ -46,7 +46,7 @@ class Pad extends Component {
       </div>
       {value
         ? <img className={styles.sigImage}
-          src={value} />
+          src={value} alt="" />
         : null}
 
     </div>
