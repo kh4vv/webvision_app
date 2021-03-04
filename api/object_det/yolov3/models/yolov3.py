@@ -25,7 +25,6 @@ class ConvoLayer(nn.Module):
             kernel_size(int) : kernel size
             stride : 1 as default
             neg_slope: 0.1 as default
-        
         """
         super().__init__()
         padding = (kernel_size-1)//2
@@ -40,6 +39,7 @@ class ConvoLayer(nn.Module):
         
         return y
 
+
 class ResidulBlock(nn.Module):
     """
     Residual Block is consist with two convolutional layers and one residual layer 
@@ -47,7 +47,6 @@ class ResidulBlock(nn.Module):
     From YOLOv3: An Incremental Improvement (U of W) Paper,
     The first convolutional layers has half of the number of the filters as the second convolutional layers
     The First convolutional layers = 1 x 1 filter size and the Second convolutional layers = 3 x 3 filter size.
-    
     """
     def __init__(self, channel_in):
         
@@ -64,6 +63,7 @@ class ResidulBlock(nn.Module):
         y += residual
         return y
 
+
 def DarkNetBlock(channel_in, channel_out, resblock_num):
     """
     In DarkNet Backbone, the format is usually : one convolutional layer + residual block + residual blocks + ...
@@ -78,7 +78,6 @@ def DarkNetBlock(channel_in, channel_out, resblock_num):
 
     Returns:
         block: Sequential with all layers combined (convolutional layer + residual blocks)
-
     """
     block = nn.Sequential()
     block.add_module('conv', ConvoLayer(channel_in, channel_out, 3, stride=2))
@@ -149,7 +148,6 @@ class YoloLayer(nn.Module):
             pred_bbox = torch.stack((x_pred, y_pred, w_pred, h_pred),dim=4).view(batch_size,-1,4)      # Bounding Box (cx, cy, w, h)
             output = torch.cat((pred_bbox, pred_conf, pred_cls), -1)
             return output
-
 
 
 class DetectionBlock(nn.Module):
@@ -250,8 +248,6 @@ class YoloV3(nn.Module):
         super().__init__()
         self.darknet = Darknet53Backbone()
         self.yolotail = YoloNetTail()
-        #self.nms = NMS
-        #self.post_process= post
 
     def forward(self, x):
         y1_, y2_, y3_ = self.darknet(x)

@@ -14,7 +14,7 @@ import torch
 
 from classification.evaluation import mnist_evaluation, quickdraw_evaluation, landmark_evaluation, transform_landmark
 from classification.models.models import LeNet, ResNext101Landmark, EfficientNetLandmark
-from object_det.yolov3 import evaluation
+from object_det.yolov3.evaluation import yolov3_evaluation
 
 # Initialize the useless part of the base64 encoded image.
 init_Base64 = 22
@@ -28,7 +28,7 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 
 @app.route('/mnist_upload', methods=['GET', 'POST'])
-def fileUpload():
+def mnist_upload():
     mnist_f = request.files['file']
     mnist_fname = secure_filename(mnist_f.filename)
     print(mnist_fname)
@@ -36,7 +36,7 @@ def fileUpload():
     mnist_f.save(os.path.join('outputs/', mnist_fname))
     mnist_img = Image.open(mnist_f, 'r')
 
-    weight_path = './weights/mnist.pth'
+    weight_path = './weights/lenet.pth'
     mnist_model = LeNet().to(device)
 
     mnist_img, mnist_preds = mnist_evaluation(
@@ -54,19 +54,18 @@ def mnist_predict():
     mnist_draw = mnist_draw[init_Base64:]
     mnist_img = Image.open(BytesIO(base64.b64decode(mnist_draw)))
 
-    weight_path = './weights/mnist.pth'
+    weight_path = './weights/lenet.pth'
     mnist_model = LeNet().to(device)
     mnist_img, mnist_pred = mnist_evaluation(
         mnist_img, weight_path, mnist_model, pad=True)
 
     mnist_pred = int(mnist_pred)
-    print(mnist_pred)
     result = {'pred': mnist_pred}
     return jsonify(result)
 
 
 @app.route('/landmark', methods=['GET', 'POST'])
-def landmark_upload_image():
+def landmark_upload():
     with open('./classification/dataset/landmark_classmap.json', 'r', encoding='UTF-8-sig') as json_file:
         landmark_classmap = json.load(json_file)
 
@@ -78,7 +77,7 @@ def landmark_upload_image():
 
         num_classes = 1049
         # weight_path = './object_det/weights/effnet_448_512_34_190000.pth'
-        weight_path = 'weights/ResNext101_448_300_141_390000.pth'
+        weight_path = './weights/ResNext101_448_300_141_390000.pth'
 
         # model = EfficientNetLandmark(1, num_classes)
         model = ResNext101Landmark(num_classes).to(device)
@@ -106,7 +105,7 @@ def quickdraw_predict():
                                interpolation=cv2.INTER_AREA)
         quick_img = Image.fromarray(quick_img)
 
-        weight_path = './weight/quickdraw_90_animal.pth'
+        weight_path = './weights/quickdraw_90_animal.pth'
         quick_model = LeNet(num_classes=44).to(device)
         quick_img, quick_pred = quickdraw_evaluation(
             quick_img, weight_path, quick_model)
@@ -114,6 +113,27 @@ def quickdraw_predict():
         quick_pred = int(quick_pred)
         quick_label = quickdraw_animal_map[quick_pred]
     return render_template('draw_quickdraw.html')
+
+
+@app.route('/yolov3', methods=['GET', 'POST'])
+def yolov3_upload():
+
+    with open('./object_det/yolov3/dataset/coco.names', 'r') as coco_name:
+        coco_classmap = coco_name.read().split("\n")[:-1]
+
+    yolov3_f = request.files['file']
+    yolov3_fname = secure_filename(yolov3_f.filename)
+
+    if yolov3_fname =='':
+        return redirect(url_for('yolov3'))
+    
+    yolov3_img = Image.open(yolov3_f, 'r')
+    weight_path = './weights/yolov3.pth'
+    yolov3_img = yolov3_evaluation(yolov3_img, weight_path, coco_classmap, yolov3_fname)
+    print(yolov3_img)
+
+    result = {'filename': yolov3_fname}
+    return jsonify(result)
 
 
 @app.route('/outputs', methods=['GET', 'POST'])

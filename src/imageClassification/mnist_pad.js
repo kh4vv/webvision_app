@@ -35,6 +35,7 @@ class Pad extends Component {
   render() {
     let { value } = this.state
     return <div className={styles.container}>
+      <h2><Icon name="edit" /> Draw Yourself! </h2>
       <div className={styles.sigContainer}>
         <SignaturePad maxWidth="50" canvasProps={{ className: styles.sigPad }}
           ref={(ref) => { this.sigPad = ref }} />
