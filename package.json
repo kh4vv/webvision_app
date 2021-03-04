@@ -51,5 +51,6 @@
   "proxy": "http://localhost:9000",
   "devDependencies": {
     "webpack-merge": "^5.7.3"
-  }
+  },
+  "homepage": "/welcome"
 }

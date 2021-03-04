@@ -1,5 +1,5 @@
-import React, {Component } from "react";
-import Pad from "./pad";
+import React, { Component } from "react";
+import Pad from "./mnist_pad";
 import { Icon } from "semantic-ui-react";
 
 
@@ -9,7 +9,7 @@ class Quickdraw extends Component {
       <div className="containter" style={{ width: "800px" }}>
         <Subject />
         <br></br>
-        <Pad className="canvas" />
+        <Pad style={{ height: "300px", width: "300px", border: "2px solid #F0F" }} />
       </div>
     );
   }

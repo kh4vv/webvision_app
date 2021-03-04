@@ -1,23 +1,23 @@
 import React, { Component } from 'react'
 import SignaturePad from 'react-signature-canvas'
-import { Button } from 'semantic-ui-react';
+import { Button, Header, Icon } from 'semantic-ui-react';
 import axios from "axios";
 
 import styles from './styles.module.css'
 
 class Pad extends Component {
-  state = { value: null }
+  state = { value: null, predic: null }
   sigPad = {}
   clear = () => {
     this.sigPad.clear()
   }
 
-  fileUploadHandler = () => {
+  fileUploadHandler = async event => {
+    event.preventDefault();
     this.setState({
       value: this.sigPad.getCanvas()
         .toDataURL('image/png')
     })
-    console.log(this.state.value);
     const fd = new FormData()
     fd.append('url', this.state.value)
     axios
@@ -27,7 +27,8 @@ class Pad extends Component {
         },
       })
       .then((res) => {
-        console.log(res);
+        this.setState({ predic: res.data.pred });
+        console.log(this.state.predic)
       });
   };
 
@@ -42,17 +43,15 @@ class Pad extends Component {
         <Button.Group>
           <Button onClick={this.clear}>  Clear    </Button>
           <Button.Or />
-          <Button positive onClick={this.fileUploadHandler}> Submit </Button></Button.Group>
+          <Button positive onClick={e => this.fileUploadHandler(e)}> Submit </Button></Button.Group>
       </div>
-      {value
-        ? <img className={styles.sigImage}
-          src={value} alt="" />
-        : null}
-
+      <Header as="h2">
+        <Icon name="plug" />
+        <Header.Content> Prediction : {this.state.predic}</Header.Content>
+      </Header>
     </div>
   }
 }
 
 export default Pad;
-//ReactDOM.render(<Pad />, document.getElementById('root'))
 

@@ -1,5 +1,8 @@
 import React, { Component } from "react";
 import axios from "axios";
+import { Icon } from "semantic-ui-react";
+
+const databaseURL = "https://webvision-app-default-rtdb.firebaseio.com/"
 
 class Upload extends Component {
   state = {
@@ -29,7 +32,6 @@ class Upload extends Component {
     event.preventDefault();
     const { imgname } = this.state;
     const { predic } = this.state;
-    const { setData } = this.props;
 
     if (!this.state.selectedFile) {
       alert("Please Upload Image.")
@@ -38,7 +40,7 @@ class Upload extends Component {
 
     const fd = new FormData();
     fd.append("file", this.state.selectedFile);
-    const alldata = await axios
+    await axios
       .post("http://localhost:9000/mnist_upload", fd, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -46,23 +48,9 @@ class Upload extends Component {
       })
       .then((res) => {
         console.log(res);
+        this.setState({ imgname: res.data.filename, predic: res.data.pred });
+        console.log(this.state.imgname, this.state.predic);
       });
-  };
-
-  fileDownloadHandler = () => {
-    axios
-      .get("http://localhost:9000/mnist_upload").then(response => {
-        console.log(response)
-        this.setState({ imgname: response.data.filename, predic: response.data.pred })
-        console.log(response.data.filename, response.data.pred)
-      }).catch(error => {
-        console.log(error)
-      })
-  };
-
-  onClick = () => {
-    this.fileUploadHandler();
-    this.fileDownloadHandler();
   };
 
   render() {
@@ -80,8 +68,12 @@ class Upload extends Component {
         <input type="file" onChange={this.fileSelectedHandler} />
         <button type='submit' onClick={e => this.fileUploadHandler(e)}> Upload </button>
         <div className="imgPreview">{$imagePreview}</div>
-        <h3> Prediction: {this.state.predic} </h3>
-        <h4> Filename: {this.state.imgname} </h4>
+        <h2><Icon name="edit" /> Prediction: {this.state.predic} </h2>
+        <h2><Icon name="file image" />Filename: {this.state.imgname} </h2>
+        {this.state.imgname
+          ? <img className={this.state.imgname}
+            src={'http://localhost:9000/outputs/' + this.state.imgname} alt="" style={{ width: '150px' }} />
+          : null}
       </div>
     );
   }

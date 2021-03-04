@@ -1,16 +1,9 @@
-import React, { Component} from "react";
-import {Header, Image, Icon } from "semantic-ui-react";
-import "bootstrap/dist/css/bootstrap.min.css";
+import React, { Component } from "react";
+import { Header, Icon } from "semantic-ui-react";
 
 import Upload from "./landmark_upload";
-import "./mnist.css";
 
 class LandMark extends Component {
-
-  state = {
-    fn: null,
-    predic: null,
-  };
 
   render() {
     return (
@@ -23,23 +16,17 @@ class LandMark extends Component {
           </Header>
         </div>
         <Upload />
-        <Image src={this.state.fn} style={imagestyle} />
         <br></br>
       </div>
     );
   }
 }
 
-const imagestyle = {
-  height: "200px",
-  width: "200px",
-};
-
 class Subject extends Component {
   render() {
     return (
       <header>
-        <h2> Korea Landmark Project</h2>
+        <h2> <Icon name="globe" />Korea Landmark Project</h2>
         <h3>
           {" "}
           You can upload Korea Landmark image{" "}

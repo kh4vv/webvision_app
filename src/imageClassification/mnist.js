@@ -1,11 +1,8 @@
-import React, { Component} from "react";
-import {Header, Image, Icon } from "semantic-ui-react";
-//import SignatureCanvas from "react-signature-canvas";
-import "bootstrap/dist/css/bootstrap.min.css";
+import React, { Component } from "react";
+import { Header, Icon } from "semantic-ui-react";
 
 import Upload from "../imageClassification/mnist_upload";
-import Pad from "./pad";
-import "./mnist.css";
+import Pad from "./mnist_pad";
 
 class Mnist extends Component {
 
@@ -25,28 +22,18 @@ class Mnist extends Component {
           </Header>
         </div>
         <Upload />
-        <Image src={this.state.fn} style={imagestyle} />
         <br></br>
-        <Header as="h2">
-          <Icon name="plug" />
-          <Header.Content> Prediction : {this.state.predic}</Header.Content>
-        </Header>
-        <Pad className="canvas" />
+        <Pad style={{ height: "300px", width: "300px", border: "2px solid #F0F" }} />
       </div>
     );
   }
 }
 
-const imagestyle = {
-  height: "200px",
-  width: "200px",
-};
-
 class Subject extends Component {
   render() {
     return (
       <header>
-        <h2> MNIST Project</h2>
+        <h2> <Icon name="numbered list" /> MNIST Project</h2>
         <h3>
           {" "}
           You can either upload MNIST image or draw the numbers on the pad{" "}

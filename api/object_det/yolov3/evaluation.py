@@ -1,21 +1,20 @@
 import sys
+import os
 import glob
-
-from PIL import Image, ImageDraw
+import numbers
 import numpy as np
 import cv2
-import numbers
+from PIL import Image, ImageDraw
+from albumentations.pytorch import ToTensorV2
+import albumentations as A
 
 import torch
-from torchvision import transforms as tv_tf
-from torch.utils.data import Dataset
-from torch.utils.data import DataLoader
 from torchvision.transforms import functional as TF
+from torch.utils.data import DataLoader
+from torch.utils.data import Dataset
+from torchvision import transforms as tv_tf
 
-import albumentations as A
-from albumentations.pytorch import ToTensorV2
-
-from models.yolov3 import YoloV3
+from . models.yolov3 import YoloV3
 
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -27,13 +26,13 @@ def yolov3_evaluation(img, weight_path, class_name, filename):
     model.load_state_dict(torch.load(weight_path))
     model.to(device)
     model.eval()
-    dataset = ImageFolder(img, img_size = 416)
+    dataset = ImageFolder(img, img_size=416)
 
     results = run_detection(model, dataset, device, 0.8, 0.4)
     print("done run detection")
     for img_i, result in enumerate(results):
         detections, _, _ = result
-        img = draw_result(img, detections, class_names = class_name)
+        img = draw_result(img, detections, class_names=class_name)
         img.save(filename)
     print("image saved")
 
@@ -53,7 +52,7 @@ class ImageFolder(Dataset):
         max_size = max(w, h)
         _padding = _get_padding(h, w)
         transformed_img_tensor, _ = self._transform(img)
-        transformed_img_tensor = torch.unsqueeze(transformed_img_tensor, dim =0)
+        transformed_img_tensor = torch.unsqueeze(transformed_img_tensor, dim=0)
         scale = self._img_size / max_size
         return transformed_img_tensor, scale, np.array(_padding)
 
@@ -107,11 +106,6 @@ class PadToSquareWithLabel(object):
             -symmetric: pads with reflection of image with repeating the last value on the edge
 
     """
-    def __init__(self, fill=0, padding_mode='constant'):
-        assert isinstance(fill, (numbers.Number, str, tuple))
-        assert padding_mode in ['constant', 'edge', 'reflect', 'symmetric']
-        self.fill = fill
-        self.padding_mode = padding_mode
 
     def __init__(self, fill=0, padding_mode='constant'):
         assert isinstance(fill, (numbers.Number, str, tuple))
@@ -119,7 +113,13 @@ class PadToSquareWithLabel(object):
         self.fill = fill
         self.padding_mode = padding_mode
 
-    @staticmethod
+    def __init__(self, fill=0, padding_mode='constant'):
+        assert isinstance(fill, (numbers.Number, str, tuple))
+        assert padding_mode in ['constant', 'edge', 'reflect', 'symmetric']
+        self.fill = fill
+        self.padding_mode = padding_mode
+
+    @ staticmethod
     def _get_padding(w, h):
         """
         Generate the size of the padding given the size of the image
@@ -160,10 +160,10 @@ class ResizeWithLabel(tv_tf.Resize):
             return img, label
         scale_w = w_new/w_old
         scale_h = h_new/h_old
-        label[...,0] *= scale_w
-        label[...,1] *= scale_h
-        label[...,2] *= scale_w
-        label[...,3] *= scale_h
+        label[..., 0] *= scale_w
+        label[..., 1] *= scale_h
+        label[..., 2] *= scale_w
+        label[..., 3] *= scale_h
         return img, label
 
 
@@ -178,7 +178,7 @@ def grouping_class(classes, num_class):
         group_index : a list of group index
 
     """
-    group_index = [ [] for _ in range(num_class)]
+    group_index = [[] for _ in range(num_class)]
 
     for index, class_ in enumerate(classes):
         group_index[torch.argmax(class_)].append(index)
@@ -232,32 +232,33 @@ def run_detection(model, dataloader, device, conf_thres, nms_thres):
 
     """
     results = []
-    detection_time_list =[]
-    num_class =80
+    detection_time_list = []
+    num_class = 80
 
     for index, batch in enumerate(dataloader):
         img_batch = batch[0].to(device)
         scales = batch[1]
-        scales = torch.tensor([scales], dtype = float)
+        scales = torch.tensor([scales], dtype=float)
         scales = scales.to(device)
         paddings = batch[2]
         paddings = torch.from_numpy(paddings)
-        paddings = torch.unsqueeze(paddings, dim =0)
+        paddings = torch.unsqueeze(paddings, dim=0)
         paddings = paddings.to(device)
-        #Get detection
+        # Get detection
         with torch.no_grad():
             detections = model(img_batch)
         detections = post_process(num_class, detections, conf_thres, nms_thres)
         for detection, scale, padding in zip(detections, scales, paddings):
-            #Transform the bbox from the scaled image back to the unsclaed image
-            detection[..., :4] = untransform_box(detection[..., :4], scale, padding)
-            #cxcywh to xywh
-            detection[..., 0] -= detection[...,2]/2
-            detection[..., 1] -= detection[...,3]/2
+            # Transform the bbox from the scaled image back to the unsclaed image
+            detection[..., :4] = untransform_box(
+                detection[..., :4], scale, padding)
+            # cxcywh to xywh
+            detection[..., 0] -= detection[..., 2]/2
+            detection[..., 1] -= detection[..., 3]/2
 
         results.extend(zip(detections, scales, padding))
         print(results)
-        #return results
+        # return results
         break
     return results
 
@@ -295,19 +296,21 @@ def post_process(num_class, result, conf_thres, nms_thres):
     """
     results = []
     for index, raw in enumerate(result):
-        bboxes = raw[... , :4]
-        scores = raw[... , 4]
-        classes = raw[... , 5:]
+        bboxes = raw[..., :4]
+        scores = raw[..., 4]
+        classes = raw[..., 5:]
         classes = torch.argmax(classes, dim=1)
 
-        bboxes, scores, classes = NMS(bboxes, scores, classes, num_class, conf_thres, nms_thres, center= True)
+        bboxes, scores, classes = NMS(
+            bboxes, scores, classes, num_class, conf_thres, nms_thres, center=True)
 
-        results_ = torch.cat((bboxes, scores.view(-1,1),classes.view(-1,1).float()) , dim =1)
+        results_ = torch.cat((bboxes, scores.view(-1, 1),
+                              classes.view(-1, 1).float()), dim=1)
         results.append(results_)
     return results
 
 
-def NMS(bboxes, scores, classes, num_class, conf_thres, nms_thres, center = False):
+def NMS(bboxes, scores, classes, num_class, conf_thres, nms_thres, center=False):
     """
     Apply non-max suppression to avoid overlapping bounding boxes
 
@@ -326,12 +329,11 @@ def NMS(bboxes, scores, classes, num_class, conf_thres, nms_thres, center = Fals
     """
     num_prior = bboxes.shape[0]
 
-    #if no objects, return raw result
+    # if no objects, return raw result
     if num_prior == 0:
         return bboxes, scores, classes
 
-
-    #Apply threshold
+    # Apply threshold
     if conf_thres > 0:
         conf_index = torch.nonzero(torch.ge(scores, conf_thres)).squeeze()
 
@@ -339,16 +341,18 @@ def NMS(bboxes, scores, classes, num_class, conf_thres, nms_thres, center = Fals
         scores = scores.index_select(0, conf_index)
         classes = classes.index_select(0, conf_index)
 
-    #If more than one class, divide them into groups
-    #group_indices = grouping_(classes, num_class)
-    group_indices = group_same_class_object(classes, one_hot=False, num_classes=num_class)
+    # If more than one class, divide them into groups
+    # group_indices = grouping_(classes, num_class)
+    group_indices = group_same_class_object(
+        classes, one_hot=False, num_classes=num_class)
     final_indices = []
 
     for class_id, index in enumerate(group_indices):
-        index_tensor = bboxes.new_tensor(index, dtype = torch.long)
-        bboxes_class = bboxes.index_select(dim =0, index = index_tensor)
-        scores_class = scores.index_select(dim =0, index = index_tensor)
-        socres_class, sorted_indices = torch.sort(scores_class, descending=False)
+        index_tensor = bboxes.new_tensor(index, dtype=torch.long)
+        bboxes_class = bboxes.index_select(dim=0, index=index_tensor)
+        scores_class = scores.index_select(dim=0, index=index_tensor)
+        socres_class, sorted_indices = torch.sort(
+            scores_class, descending=False)
 
         selected_indices = []
 
@@ -356,16 +360,16 @@ def NMS(bboxes, scores, classes, num_class, conf_thres, nms_thres, center = Fals
             index_ = sorted_indices[-1]
             selected_indices.append(index_)
             bbox = bboxes_class[index_]
-            ious = IOU(bbox, bboxes_class[sorted_indices[:-1]], center= center)
+            ious = IOU(bbox, bboxes_class[sorted_indices[:-1]], center=center)
 
             index__ = torch.nonzero(ious <= nms_thres).squeeze()
-            sorted_indices = sorted_indices.index_select(dim=0, index = index__)
+            sorted_indices = sorted_indices.index_select(dim=0, index=index__)
         final_indices.extend([index[i] for i in selected_indices])
 
     final_indices = bboxes.new_tensor(final_indices, dtype=torch.long)
-    bboxes_result = bboxes.index_select(dim=0, index = final_indices)
-    scores_result = scores.index_select(dim=0, index = final_indices)
-    classes_result=classes.index_select(dim=0, index = final_indices)
+    bboxes_result = bboxes.index_select(dim=0, index=final_indices)
+    scores_result = scores.index_select(dim=0, index=final_indices)
+    classes_result = classes.index_select(dim=0, index=final_indices)
 
     return bboxes_result, scores_result, classes_result
 
@@ -382,10 +386,10 @@ def IOU(bbox1, bbox2, center=False):
     h2 = bbox2[..., 3]
 
     if center:
-        x1 = x1- w1/2
-        y1 = y1- h1/2
-        x2 = x2- w2/2
-        y2 = y2- h2/2
+        x1 = x1 - w1/2
+        y1 = y1 - h1/2
+        x2 = x2 - w2/2
+        y2 = y2 - h2/2
 
     area1 = w1 * h1
     area2 = w2 * h2
@@ -394,14 +398,14 @@ def IOU(bbox1, bbox2, center=False):
     bot1 = y1 + h1
     bot2 = y2 + h2
 
-    w_intersect = (torch.min(right1, right2) - torch.max(x1,x2)).clamp(min=0)
+    w_intersect = (torch.min(right1, right2) - torch.max(x1, x2)).clamp(min=0)
     h_intersect = (torch.min(bot1, bot2) - torch.max(y1, y2)).clamp(min=0)
     aoi = w_intersect * h_intersect
-    iou = aoi / (area1+ area2- aoi+ 1e-10) #1e-10 to avoid 0 division.
+    iou = aoi / (area1 + area2 - aoi + 1e-10)  # 1e-10 to avoid 0 division.
     return iou
 
 
-def draw_result(image, boxes, show=False, class_names = None):
+def draw_result(image, boxes, show=False, class_names=None):
     """
     Draw bounding boxes and labels of detections
 
@@ -414,17 +418,18 @@ def draw_result(image, boxes, show=False, class_names = None):
     show_class = (boxes.size(1) >= 6)
 
     for box in boxes:
-        x,y,w,h = box[:4]
+        x, y, w, h = box[:4]
         x2 = x+w
         y2 = y+h
-        draw.rectangle([x,y,x2,y2],outline='white',width=3)
+        draw.rectangle([x, y, x2, y2], outline='white', width=3)
         if show_class:
             class_id = int(box[5])
             class_name = class_names[class_id]
             font_size = 20
             text_size = draw.textsize(class_name)
-            draw.rectangle([x,y-text_size[1]*2, x+ text_size[0], y] , fill = 'white')
-            draw.text([x, y-font_size], class_name, fill ='black')
+            draw.rectangle([x, y-text_size[1]*2, x +
+                            text_size[0], y], fill='white')
+            draw.text([x, y-font_size], class_name, fill='black')
     if show:
         image.show()
 

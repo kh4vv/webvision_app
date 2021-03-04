@@ -16,6 +16,8 @@
 # Weight
 /api/classification/weights
 /api/object_det/weights
+/api/weights
+/api/outputs
 
 # misc
 .DS_Store
