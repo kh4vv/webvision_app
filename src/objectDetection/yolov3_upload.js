@@ -46,7 +46,7 @@ class Upload extends Component {
       })
       .then((res) => {
         console.log(res);
-        this.setState({ imgname: res.data.filename});
+        this.setState({ imgname: res.data.filename });
         console.log(this.state.imgname);
       });
   };
@@ -64,7 +64,7 @@ class Upload extends Component {
       <div className="upload">
         <input type="file" onChange={this.fileSelectedHandler} />
         <button type='submit' onClick={e => this.fileUploadHandler(e)}> Upload </button>
-        <h2><Icon name="file image" />Filename: {this.state.imgname} </h2>
+        <h5><Icon name="file image" />Filename: {this.state.imgname} </h5>
         {this.state.imgname
           ? <img className={this.state.imgname}
             src={'http://localhost:9000/outputs/' + this.state.imgname} alt="" style={{ width: '100%' }} />
