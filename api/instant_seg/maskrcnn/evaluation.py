@@ -8,9 +8,6 @@ import torch.optim as optim
 from torchvision import models, transforms
 from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 
-print("PyTorch Version: ", torch.__version__)
-print("Torchvision Version: ", torchvision.__version__)
-
 #device
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -18,7 +15,7 @@ def maskrcnn_evaluation(img, classmap, filename):
     #Pre-trained Model Fine Tuning
     model = models.detection.maskrcnn_resnet50_fpn(pretrained=True)
     model = model.to(device)
-    #eval
+
     model.eval()
 
     img_input = transforms.ToTensor()(img)

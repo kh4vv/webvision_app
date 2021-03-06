@@ -15,7 +15,7 @@ import torch
 from classification.evaluation import mnist_evaluation, quickdraw_evaluation, landmark_evaluation, transform_landmark
 from classification.models.models import LeNet, ResNext101Landmark, EfficientNetLandmark
 from object_det.yolov3.evaluation import yolov3_evaluation
-from instant_seg.maskrcnn import maskrcnn_evaluation
+from instant_seg.maskrcnn.evaluation import maskrcnn_evaluation
 
 # Initialize the useless part of the base64 encoded image.
 init_Base64 = 22
@@ -26,6 +26,9 @@ CORS(app)
 app.secret_key = "u of virginia"
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
+with open('./data/coco.names', 'r') as coco_name:
+    coco_classmap = coco_name.read().split("\n")[:-1]
 
 
 @app.route('/mnist_upload', methods=['GET', 'POST'])
@@ -118,10 +121,6 @@ def quickdraw_predict():
 
 @app.route('/yolov3', methods=['GET', 'POST'])
 def yolov3_upload():
-
-    with open('./object_det/yolov3/dataset/coco.names', 'r') as coco_name:
-        coco_classmap = coco_name.read().split("\n")[:-1]
-
     yolov3_f = request.files['file']
     yolov3_fname = secure_filename(yolov3_f.filename)
 
@@ -129,7 +128,6 @@ def yolov3_upload():
     weight_path = './weights/yolov3.pth'
     yolov3_img = yolov3_evaluation(
         yolov3_img, weight_path, coco_classmap, yolov3_fname)
-    print(yolov3_img)
 
     result = {'filename': yolov3_fname}
     return jsonify(result)
@@ -137,9 +135,6 @@ def yolov3_upload():
 
 @app.route('/maskrcnn', methods=['GET', 'POST'])
 def maskrcnn():
-
-    with open('./object_det/yolov3/dataset/coco.names', 'r') as coco_name:
-        coco_classmap = coco_name.read().split("\n")[:-1]
 
     maskrcnn_f = request.files['file']
     maskrcnn_fname = secure_filename(maskrcnn_f.filename)
