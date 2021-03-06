@@ -15,6 +15,7 @@ import torch
 from classification.evaluation import mnist_evaluation, quickdraw_evaluation, landmark_evaluation, transform_landmark
 from classification.models.models import LeNet, ResNext101Landmark, EfficientNetLandmark
 from object_det.yolov3.evaluation import yolov3_evaluation
+from instant_seg.maskrcnn import maskrcnn_evaluation
 
 # Initialize the useless part of the base64 encoded image.
 init_Base64 = 22
@@ -124,16 +125,33 @@ def yolov3_upload():
     yolov3_f = request.files['file']
     yolov3_fname = secure_filename(yolov3_f.filename)
 
-    if yolov3_fname =='':
-        return redirect(url_for('yolov3'))
-    
     yolov3_img = Image.open(yolov3_f, 'r')
     weight_path = './weights/yolov3.pth'
-    yolov3_img = yolov3_evaluation(yolov3_img, weight_path, coco_classmap, yolov3_fname)
+    yolov3_img = yolov3_evaluation(
+        yolov3_img, weight_path, coco_classmap, yolov3_fname)
     print(yolov3_img)
 
     result = {'filename': yolov3_fname}
     return jsonify(result)
+
+
+@app.route('/maskrcnn', methods=['GET', 'POST'])
+def maskrcnn():
+
+    with open('./object_det/yolov3/dataset/coco.names', 'r') as coco_name:
+        coco_classmap = coco_name.read().split("\n")[:-1]
+
+    maskrcnn_f = request.files['file']
+    maskrcnn_fname = secure_filename(maskrcnn_f.filename)
+    maskrcnn_f.save(os.path.join('outputs/', maskrcnn_fname))
+
+    maskrcnn_img = Image.open(maskrcnn_f, 'r')
+    maskrcnn_img = maskrcnn_evaluation(
+        maskrcnn_img, coco_classmap, maskrcnn_fname)
+    maskrcnn_img['filename'] = maskrcnn_fname
+    #print(maskrcnn_img)
+
+    return jsonify(maskrcnn_img)
 
 
 @app.route('/outputs', methods=['GET', 'POST'])

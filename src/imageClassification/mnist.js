@@ -6,11 +6,6 @@ import Pad from "./mnist_pad";
 
 class Mnist extends Component {
 
-  state = {
-    fn: null,
-    predic: null,
-  };
-
   render() {
     return (
       <div className="container" style={{ width: "800px" }}>

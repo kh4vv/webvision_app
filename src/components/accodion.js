@@ -52,7 +52,6 @@ class AccordionStyled extends Component {
               <Button size="medium"><a href="/yolov3"> YOLO v3</a></Button>
               </p><p>
               <Button size="medium" color="grey"> Two Stage </Button>
-              <Button size="medium"> RCNN </Button>
               </p><p>
               <Button size="medium"> Faster RCNN </Button>
             </p>
@@ -65,7 +64,9 @@ class AccordionStyled extends Component {
           <Button size="large" color="black"> Instant Segmentation </Button>
           </Accordion.Title>
           <Accordion.Content active={activeIndex === 2}>
-          <p></p>
+          <p>
+          <Button size="medium"><a href="/maskrcnn"> Mask RCNN </a></Button>
+          </p>
           </Accordion.Content>
           </Router>
         </Accordion>

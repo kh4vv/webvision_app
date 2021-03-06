@@ -3,16 +3,19 @@ import React, { Component } from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import { Grid } from "semantic-ui-react";
 import "bootstrap/dist/css/bootstrap.min.css";
+//main page
+import main from "./components/welcome";
+import Subject from "./components/subject";
+import Footer from "./components/footer";
+import AccordionStyled from "./components/accodion";
 //Image Classification
 import mnist from "./imageClassification/mnist";
 import quickdraw from "./imageClassification/quickdraw";
 import landmark from "./imageClassification/landmark";
 //Object detection
 import Yolov3 from "./objectDetection/yolov3"
-import main from "./components/welcome";
-import Subject from "./components/subject";
-import Footer from "./components/footer";
-import AccordionStyled from "./components/accodion";
+//Instant Segmentation
+import Maskrcnn from "./instantSeg/maskrcnn"
 
 class App extends Component {
   render() {
@@ -33,6 +36,7 @@ class App extends Component {
                   <Route path="/quickdraw" component={quickdraw} />
                   <Route path="/landmark" component={landmark} />
                   <Route path="/yolov3" component={Yolov3} />
+                  <Route path="/maskrcnn" component={Maskrcnn} />
                 </Switch>
               </article>
             </Router>

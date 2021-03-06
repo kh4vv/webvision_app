@@ -1,19 +1,18 @@
 import React, { Component } from "react";
 import { Header, Icon } from "semantic-ui-react";
-import "bootstrap/dist/css/bootstrap.min.css";
 
-import Upload from "./yolov3_upload";
+import Upload from "./maskrcnn_upload";
 
-class Yolov3 extends Component {
+class Maskrcnn extends Component {
 
   render() {
     return (
       <div className="container" style={{ width: "800px" }}>
         <div style={{ margin: "20px" }}>
           <Subject />
-          <Header as="h3">
+          <Header as="h4">
             <Icon name="upload" />
-            <Header.Content> Upload Any Image </Header.Content>
+            <Header.Content> Upload Image </Header.Content>
           </Header>
         </div>
         <Upload />
@@ -27,14 +26,14 @@ class Subject extends Component {
   render() {
     return (
       <header>
-        <h2> <Icon name="camera retro" /> YOLO v3  Project</h2>
+        <h2> <Icon name="unhide" /> MASK RCNN Project</h2>
         <h3>
           {" "}
-          You can upload image - return boundry boxes with labels{" "}
+          You can upload any photo and return bounding boxes with mask {" "}
         </h3>
       </header>
     );
   }
 }
 
-export default Yolov3;
+export default Maskrcnn;
