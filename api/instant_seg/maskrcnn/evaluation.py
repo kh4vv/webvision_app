@@ -126,11 +126,11 @@ def maskrcnn_evaluation(img, filename):
     model = model.to(device)
 
     model.eval()
-
+    #img.show() 
     img_input = transforms.ToTensor()(img)
     img_input = img_input.unsqueeze(0)
     img_input = img_input.to(device)
-
+    torch.save(img_input,"img_test_re")
     outputs = model(img_input)[0]
 
     scores = outputs['scores'].cpu().detach().numpy()
@@ -141,6 +141,7 @@ def maskrcnn_evaluation(img, filename):
     fig, ax = plt.subplots(1, 1, figsize=(11,5), dpi=300)
 
     for score, box, mask, label in zip(scores, boxes, masks, labels):
+        #print(score, box, mask, label)
         if score > 0.6:
             padded_mask = np.where(mask[0] > 0.5, 1, 0)
             contour = find_contours(padded_mask, 0.1)
@@ -148,19 +149,22 @@ def maskrcnn_evaluation(img, filename):
             contour = np.flip(contour, axis=1)
             polygon = Polygon(contour, fc=COLOR_MAP[label][0], ec=COLOR_MAP[label][1], lw=0.5)
             ax.add_patch(polygon)
+            print(polygon)
 
             ax.annotate(COCO_CLASSES[label], (box[0], box[1]), color='w', weight='bold', 
                 fontsize=3, ha='left', va='bottom', 
                 bbox=dict(facecolor=COLOR_MAP[label][0], edgecolor=COLOR_MAP[label][1], pad=0.0))
 
     ax.axis('off')
-    plt.savefig(os.path.join('outputs/', filename))
+    plt.savefig(filename)
+    plt.show()
 
     box_list = boxes.tolist()
     label_list = labels.tolist()
     score_list = scores.tolist()
     mask_list = masks.tolist()
     result = {}
+    #print(box_list)
     result = {"boxes": box_list, "labels": label_list, "scores": score_list, "masks": mask_list}
     return result
     

@@ -140,6 +140,7 @@ def maskrcnn():
     maskrcnn_fname = secure_filename(maskrcnn_f.filename)
 
     maskrcnn_img = Image.open(maskrcnn_f, 'r')
+    #maskrcnn_img.show()
     maskrcnn_img = maskrcnn_evaluation(
         maskrcnn_img, maskrcnn_fname)
     maskrcnn_img['filename'] = maskrcnn_fname
