@@ -3,8 +3,8 @@ import os
 from random import randrange
 import numpy as np
 
-from PIL import Image
-import matplotlib.pyplot as plt
+from PIL import Image, ImageDraw
+# import matplotlib.pyplot as plt
 from matplotlib.collections import PatchCollection
 from matplotlib.patches import FancyBboxPatch, Polygon, Rectangle
 from skimage.measure import find_contours
@@ -138,7 +138,11 @@ def maskrcnn_evaluation(img, filename):
     masks = outputs['masks'].cpu().detach().numpy()
     labels = outputs['labels'].cpu().detach().numpy()
 
-    fig, ax = plt.subplots(1, 1, figsize=(11,5), dpi=300)
+    background = Image.new('RGBA', img.size)
+    background.paste(img)
+    poly = Image.new('RGBA', img.size)
+
+    # fig, ax = plt.subplots(1, 1, figsize=(11,5), dpi=300)
 
     for score, box, mask, label in zip(scores, boxes, masks, labels):
         #print(score, box, mask, label)
@@ -147,17 +151,29 @@ def maskrcnn_evaluation(img, filename):
             contour = find_contours(padded_mask, 0.1)
             contour = contour[0]
             contour = np.flip(contour, axis=1)
-            polygon = Polygon(contour, fc=COLOR_MAP[label][0], ec=COLOR_MAP[label][1], lw=0.5)
-            ax.add_patch(polygon)
-            print(polygon)
 
-            ax.annotate(COCO_CLASSES[label], (box[0], box[1]), color='w', weight='bold', 
-                fontsize=3, ha='left', va='bottom', 
-                bbox=dict(facecolor=COLOR_MAP[label][0], edgecolor=COLOR_MAP[label][1], pad=0.0))
+            contour = contour.flatten().tolist()
 
-    ax.axis('off')
-    plt.savefig(filename)
-    plt.show()
+            draw = ImageDraw.Draw(poly)
+            draw.polygon(contour, fill=(255,255,255,127), outline=(255,255,255,255))
+            draw.text([box[0], box[1]], COCO_CLASSES[label], fill=(0,0,255,0))
+            background.paste(poly, mask=poly)
+
+            draw = ImageDraw.Draw(background)
+            draw.text([box[0], box[1]], COCO_CLASSES[label], fill=(255,255,255,0))
+
+            # polygon = Polygon(contour, fc=COLOR_MAP[label][0], ec=COLOR_MAP[label][1], lw=0.5)
+            # ax.add_patch(polygon)
+
+            # ax.annotate(COCO_CLASSES[label], (box[0], box[1]), color='w', weight='bold', 
+                # fontsize=3, ha='left', va='bottom', 
+                # bbox=dict(facecolor=COLOR_MAP[label][0], edgecolor=COLOR_MAP[label][1], pad=0.0))
+
+    # ax.axis('off')
+    # print(type(ax))
+    # print(type(fig))
+    background = background.convert('RGB')
+    background.save(os.path.join('outputs/', filename))
 
     box_list = boxes.tolist()
     label_list = labels.tolist()
@@ -168,5 +184,3 @@ def maskrcnn_evaluation(img, filename):
     result = {"boxes": box_list, "labels": label_list, "scores": score_list, "masks": mask_list}
     return result
     
-
-
