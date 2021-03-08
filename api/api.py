@@ -138,13 +138,11 @@ def maskrcnn():
 
     maskrcnn_f = request.files['file']
     maskrcnn_fname = secure_filename(maskrcnn_f.filename)
-    maskrcnn_f.save(os.path.join('outputs/', maskrcnn_fname))
 
     maskrcnn_img = Image.open(maskrcnn_f, 'r')
     maskrcnn_img = maskrcnn_evaluation(
-        maskrcnn_img, coco_classmap, maskrcnn_fname)
+        maskrcnn_img, maskrcnn_fname)
     maskrcnn_img['filename'] = maskrcnn_fname
-    #print(maskrcnn_img)
 
     return jsonify(maskrcnn_img)
 

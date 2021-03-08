@@ -60,7 +60,7 @@ $ source venv/bin/activate
 Now, let's download all neccessary libraries before starting the backend server.
 All the requriement libraries are in `requirements.txt`. 
 ```
-$ pip install -r requirements.txt  <- 이거 지금 안되는데 왜 안되는지 모르겠네요. 나중에 형이 한번 봐주세요
+$ pip install -r requirements.txt
 ```
 For now we need to install individually before we fix the problem.
 
