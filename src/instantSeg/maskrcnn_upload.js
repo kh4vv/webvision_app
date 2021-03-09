@@ -60,7 +60,7 @@ class Upload extends Component {
         <h4><Icon name="file image" />Filename: {this.state.imgname} </h4>
         {this.state.imgname
           ? <img className={this.state.imgname}
-            src={'http://localhost:9000/outputs/' + this.state.imgname} alt="" style={{ width: '400px' }} />
+            src={'http://localhost:9000/outputs/' + this.state.imgname} alt="" style={{ width: '100' }} />
           : null}
       </div>
     );

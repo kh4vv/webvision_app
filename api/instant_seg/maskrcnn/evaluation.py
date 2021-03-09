@@ -1,9 +1,9 @@
 import os
 
-from random import randrange
+from random import randint
 import numpy as np
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageFont, ImageDraw
 # import matplotlib.pyplot as plt
 from matplotlib.collections import PatchCollection
 from matplotlib.patches import FancyBboxPatch, Polygon, Rectangle
@@ -108,16 +108,13 @@ COCO_CLASSES = {1: 'person',
 90:	'toothbrush',
 91:	'hair brush'}
 
-def rgb_to_rgba(rgb, alpha = 0.3):
-    rgb = np.asarray(rgb) / 255.
-    c1 = np.insert(rgb, len(rgb), alpha).round(2)
-    c2 = np.insert(rgb, len(rgb), 1.).round(2)
-    return (tuple(c1), tuple(c2))
-
 COLOR_MAP = {}
 
 for clss in COCO_CLASSES.keys():
-    COLOR_MAP[clss] = rgb_to_rgba((randrange(255), randrange(255), randrange(255)), 0.5)
+    r = randint(0,200)
+    g = randint(0,200)
+    b = randint(0,200)
+    COLOR_MAP[clss] = ((r, g, b, 20), (r, g, b, 200))
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -126,7 +123,7 @@ def maskrcnn_evaluation(img, filename):
     model = model.to(device)
 
     model.eval()
-    #img.show() 
+
     img_input = transforms.ToTensor()(img)
     img_input = img_input.unsqueeze(0)
     img_input = img_input.to(device)
@@ -141,37 +138,29 @@ def maskrcnn_evaluation(img, filename):
     background = Image.new('RGBA', img.size)
     background.paste(img)
     poly = Image.new('RGBA', img.size)
-
-    # fig, ax = plt.subplots(1, 1, figsize=(11,5), dpi=300)
+    font_size = 18
 
     for score, box, mask, label in zip(scores, boxes, masks, labels):
-        #print(score, box, mask, label)
         if score > 0.6:
             padded_mask = np.where(mask[0] > 0.5, 1, 0)
             contour = find_contours(padded_mask, 0.1)
             contour = contour[0]
             contour = np.flip(contour, axis=1)
-
             contour = contour.flatten().tolist()
 
+            print(COLOR_MAP[label])
+
             draw = ImageDraw.Draw(poly)
-            draw.polygon(contour, fill=(255,255,255,127), outline=(255,255,255,255))
-            draw.text([box[0], box[1]], COCO_CLASSES[label], fill=(0,0,255,0))
+            draw.polygon(contour, fill=COLOR_MAP[label][0], outline=COLOR_MAP[label][1])
             background.paste(poly, mask=poly)
+            
+            text_size = draw.textsize(COCO_CLASSES[label])
+            draw.rectangle([box[0], box[1]-text_size[1]*2, 
+                box[0] + text_size[0], box[1]], fill=COLOR_MAP[label][1])
+            draw.text([box[0], box[1]-font_size], COCO_CLASSES[label], fill='white')
 
             draw = ImageDraw.Draw(background)
-            draw.text([box[0], box[1]], COCO_CLASSES[label], fill=(255,255,255,0))
 
-            # polygon = Polygon(contour, fc=COLOR_MAP[label][0], ec=COLOR_MAP[label][1], lw=0.5)
-            # ax.add_patch(polygon)
-
-            # ax.annotate(COCO_CLASSES[label], (box[0], box[1]), color='w', weight='bold', 
-                # fontsize=3, ha='left', va='bottom', 
-                # bbox=dict(facecolor=COLOR_MAP[label][0], edgecolor=COLOR_MAP[label][1], pad=0.0))
-
-    # ax.axis('off')
-    # print(type(ax))
-    # print(type(fig))
     background = background.convert('RGB')
     background.save(os.path.join('outputs/', filename))
 
