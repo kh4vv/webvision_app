@@ -15,6 +15,7 @@ import torch
 from classification.evaluation import mnist_evaluation, quickdraw_evaluation, landmark_evaluation, transform_landmark
 from classification.models.models import LeNet, ResNext101Landmark, EfficientNetLandmark
 from object_det.yolov3.evaluation import yolov3_evaluation
+from object_det.evaluation import frcnn_evaluation
 from instant_seg.maskrcnn.evaluation import maskrcnn_evaluation
 
 # Initialize the useless part of the base64 encoded image.
@@ -132,6 +133,16 @@ def yolov3_upload():
     result = {'filename': yolov3_fname}
     return jsonify(result)
 
+@app.route('/fasterrcnn', methods=['GET', 'POST'])
+def frcnn_upload():
+    frcnn_f = request.files['file']
+    frcnn_fname = secure_filename(frcnn_f.filename)
+
+    frcnn_img = Image.open(frcnn_f, 'r')
+    frcnn_img = frcnn_evaluation(frcnn_img, frcnn_fname)
+
+    result = {'filename': frcnn_img}
+    return jsonify(result)
 
 @app.route('/maskrcnn', methods=['GET', 'POST'])
 def maskrcnn():

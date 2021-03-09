@@ -14,6 +14,7 @@ import quickdraw from "./imageClassification/quickdraw";
 import landmark from "./imageClassification/landmark";
 //Object detection
 import Yolov3 from "./objectDetection/yolov3"
+import Fasterrcnn from "./objectDetection/fasterrcnn"
 //Instant Segmentation
 import Maskrcnn from "./instantSeg/maskrcnn"
 
@@ -37,6 +38,7 @@ class App extends Component {
                   <Route path="/landmark" component={landmark} />
                   <Route path="/yolov3" component={Yolov3} />
                   <Route path="/maskrcnn" component={Maskrcnn} />
+                  <Route path="/fasterrcnn" component={Fasterrcnn} />
                 </Switch>
               </article>
             </Router>

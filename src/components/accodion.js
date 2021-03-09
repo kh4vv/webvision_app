@@ -53,7 +53,7 @@ class AccordionStyled extends Component {
               </p><p>
               <Button size="medium" color="grey"> Two Stage </Button>
               </p><p>
-              <Button size="medium"> Faster RCNN </Button>
+              <Button size="medium"><a href="/fasterrcnn"> Faster RCNN</a></Button>
             </p>
           </Accordion.Content>
   
