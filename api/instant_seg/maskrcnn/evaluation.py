@@ -114,7 +114,7 @@ for clss in COCO_CLASSES.keys():
     r = randint(0,200)
     g = randint(0,200)
     b = randint(0,200)
-    COLOR_MAP[clss] = ((r, g, b, 20), (r, g, b, 200))
+    COLOR_MAP[clss] = ((r, g, b, 10), (r, g, b, 200))
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
