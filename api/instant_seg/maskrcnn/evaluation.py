@@ -114,7 +114,7 @@ for clss in COCO_CLASSES.keys():
     r = randint(0,200)
     g = randint(0,200)
     b = randint(0,200)
-    COLOR_MAP[clss] = ((r, g, b, 10), (r, g, b, 200))
+    COLOR_MAP[clss] = ((r, g, b, 40), (r, g, b, 200))
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -127,7 +127,7 @@ def maskrcnn_evaluation(img, filename):
     img_input = transforms.ToTensor()(img)
     img_input = img_input.unsqueeze(0)
     img_input = img_input.to(device)
-    torch.save(img_input,"img_test_re")
+    # torch.save(img_input,"img_test_re")
     outputs = model(img_input)[0]
 
     scores = outputs['scores'].cpu().detach().numpy()
