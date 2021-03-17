@@ -74,6 +74,7 @@ $ pip install opencv-python
 $ pip install albumentations
 $ pip install efficientnet_pytorch
 $ pip install flask-cors
+$ pip install quickdraw
 ```
 
 After that, you can start it by using `yarn`:
@@ -89,6 +90,19 @@ Go to `api` directory and create it.
 $ mkdir weights
 $ cd weights
 ```
+Weighs can be downloaded from [Google Cloud](https://drive.google.com/drive/folders/1E8wspdt9aGRzGrCeyQlsOYMHJ3ompQtR?usp=sharing)
+
+In Google Drive, it should be contained:
+```
+effnet_448_512_34_190000.pth  
+mnist.pth  
+ResNext101_448_300_141_390000.pth  
+yolov3.pth
+```
+After you downloaded the pre-trained weight files and moved to the correct directory, 
+you need to restart the backend server by `$ yarn start-api` from the `/webvision_app` location
+
+
 
 프리트레인드 파일 어떻게 다운로드 링크 걸지 생각해봐야할거같아요 (google drive
 
