@@ -8,21 +8,21 @@ import torchvision.transforms as transforms
 
 classname = ['bear', 'dog', 'bat'] #we should add more class in future
 
-class Quickdraw(dataset):
-    def __init__(self, classname = None, datasize, transforms = None):
+class Quickdraw(Dataset):
+    def __init__(self, datasize, classname = None, transforms = None):
         self.datasize = datasize
         self.qd = QuickDrawData(max_drawings=self.datasize)
 
         if classname is None:
-            self.classname = qd.drawing_names
+            self.classname = self.qd.drawing_names
         else:
             self.classname = classname
         self.transfroms = transforms
        
-        self.label_ids = getLabelID(self.classname, self.datasize)
-        self.img_ids = getImageID(self.classname, self.datasize)
+        self.label_ids = self.getLabelID(self.classname, self.datasize)
+        self.img_ids = self.getImageID(self.classname, self.datasize)
 
-    def getLabelID(classname, datasize):
+    def getLabelID(self, classname, datasize):
         label_ids = []
         for i in range(len(classname)):
             label_id = [i for _ in range(datasize)]
@@ -30,7 +30,7 @@ class Quickdraw(dataset):
         label_ids = [element for sublist in label_ids for element in sublist]
         return label_ids
 
-    def getImageID(classname, datasize):
+    def getImageID(self, classname, datasize):
         img_ids = []
         for i in range(len(classname)):
             for j in range(datasize):
