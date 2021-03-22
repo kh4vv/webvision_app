@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import Pad from "./mnist_pad";
+import Pad from "./quick_pad";
 import { Icon } from "semantic-ui-react";
 
 
