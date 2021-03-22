@@ -6,10 +6,10 @@ import { Icon } from "semantic-ui-react";
 class Quickdraw extends Component {
   render() {
     return (
-      <div className="containter" style={{ width: "800px" }}>
+      <div className="containter" style={{ width: "1000px", height:"1000px" }}>
         <Subject />
         <br></br>
-        <Pad style={{ height: "300px", width: "300px", border: "2px solid #F0F" }} />
+        <Pad style={{ border: "2px solid #F0F" }} />
       </div>
     );
   }

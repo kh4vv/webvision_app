@@ -3,7 +3,7 @@ import SignaturePad from 'react-signature-canvas'
 import { Button, Header, Icon } from 'semantic-ui-react';
 import axios from "axios";
 
-import styles from './styles.module.css'
+import styles from './quickdraw/styles.module.css'
 
 class Pad extends Component {
   state = { value: null, predic: null }
@@ -37,7 +37,7 @@ class Pad extends Component {
     return <div className={styles.container}>
       <h2><Icon name="edit" /> Draw Yourself! </h2>
       <div className={styles.sigContainer}>
-        <SignaturePad canvasProps={{ className: styles.sigPad }}
+        <SignaturePad canvasProps={{ className: styles.sigPad ,width: 800, height:500}}
           ref={(ref) => { this.sigPad = ref }} />
       </div>
       <div>
