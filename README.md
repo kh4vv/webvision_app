@@ -4,6 +4,8 @@
 #### By K.W Hong and Y.W. Cho
 ##### Any question and comment, email here: kh4vv@virginia.edu (K.W Hong) and choyoungwoon@gmail.com (Y. W Cho)
 
+<img width="80%" src="https://user-images.githubusercontent.com/47800500/136853269-f194638b-76fa-474b-91fd-66674ab6ea3e.gif"/>
+
 #### Index of Contents
 
 1. [Getting Started](#getting-Started)
@@ -101,4 +103,8 @@ yolov3.pth
 ```
 After you downloaded the pre-trained weight files and moved to the correct directory, 
 you need to restart the backend server by `$ yarn start-api` from the `/webvision_app` location
+
+## More Video (Example) - Object Detection & Instant Segment
+<img width="80%" src="https://user-images.githubusercontent.com/47800500/136853267-4d6285f0-879a-4fb9-a5d6-338a1c08ac09.gif"/>
+<img width="80%" src="https://user-images.githubusercontent.com/47800500/136853266-df302a0f-0f6c-4fe0-98c4-3df4a9819262.gif"/>
 
